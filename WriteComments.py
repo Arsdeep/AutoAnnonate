@@ -3,9 +3,10 @@ import google.generativeai as genai
 import glob
 import sys
 import argparse
+import shutil
 
 # Set your GEMINI API key here
-GEMINI_API_KEY = 'Your Gemini API Key'
+GEMINI_API_KEY = 'your key'
 
 # Function to display progress bar
 def displayProgressBar(filesDone, totalFiles):
@@ -69,16 +70,24 @@ def process_files(src_dir, dst_dir):
 
     for root, dirs, files in os.walk(src_dir):
         # Filter out directories that start with '.'
+
         if(args.excludeHiddenDirs):
             dirs[:] = [d for d in dirs if not d.startswith('.')]
-
-        # Filter out directories in exclusion list
-        dirs = [d for d in dirs if d not in excluded_folder_list]
-
         
+        # Copy Exluded folders as it is
+        if(os.path.basename(root) in excluded_folder_list):
+            if os.path.exists(os.path.join(dst_dir, root)):
+                print(f"\n\nExcluded Directory '{root}' already exists, Skipping...\n")
+            else:
+                print(f"\n\nCopying Excluded Directory '{root}' without changes...\n")
+                shutil.copytree(root, os.path.join(dst_dir, root))
+                filesDone += count_files(root)
+                displayProgressBar(filesDone, totalFiles)
+            continue
+
         for file in files:
-            # Skip files that start with '.', this script file and the files extensions mentioned in exclusion list
-            if file.startswith('.') or file == os.path.basename(__file__) or file.endswith(tuple(excluded_extension_list)):
+            # Skip if current file is this script or exclusion files
+            if file == os.path.basename(__file__) or file == "extension_exclusion_list.txt" or file == "folder_exclusion_list.txt":
                 filesDone += 1
                 displayProgressBar(filesDone, totalFiles)
                 continue
@@ -89,11 +98,19 @@ def process_files(src_dir, dst_dir):
             # Calculate the relative path to recreate the directory structure in the destination directory
             rel_path = os.path.relpath(src_file_path, src_dir)
             dst_file_path = os.path.join(dst_dir, rel_path)
-            
+
             # Create the directory structure in the destination directory
             dst_file_dir = os.path.dirname(dst_file_path)
             if not os.path.exists(dst_file_dir):
                 os.makedirs(dst_file_dir)
+
+            # Copy Exluded files as it is
+            if file.startswith('.') or file.endswith(tuple(excluded_extension_list)):
+                print(f"\n\nCopying Excluded file '{src_file_path}' without changes...'\n")
+                shutil.copy(src_file_path, dst_file_path)
+                filesDone += 1
+                displayProgressBar(filesDone, totalFiles)
+                continue
             
             # Read the content from the source file
             with open(src_file_path, 'r') as src_file:
@@ -105,16 +122,19 @@ def process_files(src_dir, dst_dir):
             # Write the new content to the destination file
             try:
                 with open(dst_file_path, 'w', encoding='utf-8') as dst_file:
-                    dst_file.write(new_content)
-                # print(f"Successfully Created New File {rel_path}")
+                    if(new_content == "NONE"):
+                        dst_file.write(content)
+                    else:
+                        dst_file.write(new_content)
+                print(f"\n\nSuccessfully Created New File '{rel_path}'\n")
             except Exception as e:
-                print(f"Could Not Create File {rel_path}: {e}")
+                print(f"\n\nCould Not Create File '{rel_path}': {e}\n")
             finally:
                 filesDone += 1
                 displayProgressBar(filesDone, totalFiles)
 
 def handleExclusionFile():
-    default_extension_list = ['.ico', '.gz', '.jpg', '.obj', '.lib', '.dll', '.pdb', '.svg', '.pyc', '.xlsx', '.tar', '.docx', '.war', '.jpeg', '.a', '.jar', '.ipynb', '.so', '.class', '.pptx', '.pdf', '.zip', '.ear', '.gif', '.exe', '.o', '.png']
+    default_extension_list = ['.txt', '.ico', '.gz', '.jpg', '.obj', '.lib', '.dll', '.pdb', '.svg', '.pyc', '.xlsx', '.tar', '.docx', '.war', '.jpeg', '.a', '.jar', '.ipynb', '.so', '.class', '.pptx', '.pdf', '.zip', '.ear', '.gif', '.exe', '.o', '.png', '.json', '.gitignore']
 
     default_folder_list = ['__pycache__', '.idea', '.bzr', '.pytest_cache', 'tmp', 'output', 'venv', '.cache', '.hg', 'node_modules', '.gradle', '.docker', 'test_output', 'out', '.svn', '.vscode', '.vs', 'node_modules_cache', '.next', '.history', 'coverage', '.git', 'bower_components', 'temp', 'env', '.settings', 'dist', 'logs', 'backup', 'tests_output', '.sass-cache', 'build']
 
@@ -126,9 +146,9 @@ def handleExclusionFile():
                 for item in default_extension_list:
                     file.write("%s\n" % item)
         else:
-            print("extension Exclusion List Not Created, Continuing...")
+            print("Extension Exclusion List Not Created, Continuing...")
     else:
-        print("extension Exclusion List exists, Continuing...")
+        print("Extension Exclusion List exists, Continuing...")
 
 
     if not os.path.exists("./folder_exclusion_list.txt"):
@@ -172,11 +192,12 @@ if __name__ == "__main__":
             print("Exiting...")
             exit()
         else:
-            print("Continuing...")
+            shutil.rmtree(dst_directory)
+            print("Continuing...\n")
             
     handleExclusionFile()
 
-    print("Generating Code...")
+    print("\nGenerating Code...")
     # Process the files
     process_files(src_directory, dst_directory)
     sys.stdout.write('\nCompleted!\n')
