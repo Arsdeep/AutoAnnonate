@@ -1,3 +1,4 @@
+.txt
 .ico
 .gz
 .jpg
@@ -25,3 +26,4 @@
 .exe
 .o
 .png
+.json
