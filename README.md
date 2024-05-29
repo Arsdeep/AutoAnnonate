@@ -67,9 +67,10 @@ These lists are stored in `extension_exclusion_list.txt` and `folder_exclusion_l
 - Ensure that the destination directory is different from the source directory to avoid infinite loops and potential data loss.
 - The script assumes that the content in files is UTF-8 encoded.
 
-## License
+## Contribution
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+It would be a great help if you contribute to the code of the script.
+It will also be helpful for everyone if you add folder names and file extensions in the exclusion list.
 
 ## Contact
 
