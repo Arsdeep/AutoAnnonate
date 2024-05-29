@@ -1,4 +1,4 @@
-# README
+# AutoAnnotate - An AI Powered Comment Writer
 
 ## Overview
 
