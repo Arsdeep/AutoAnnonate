@@ -27,3 +27,5 @@
 .o
 .png
 .json
+.gitignore
+.css

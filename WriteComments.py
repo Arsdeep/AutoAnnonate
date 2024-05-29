@@ -39,7 +39,7 @@ def count_files(folder_path):
 # Function to get the content with comments from the Generative AI model
 def getContentWithComments(relative_path, content):
     response = model.generate_content(f"""You're a Code commentor, your job is to only write comments when provided code and output only the modified raw code with comments without using markdown. You MUST NOT modify the code in any way.
-    Write comments in the following file {relative_path} with code content -
+    Write comments in the following file {relative_path}. Write comments appropriate syntax according to file type. The files content is -
     
     {content}
     
@@ -134,7 +134,7 @@ def process_files(src_dir, dst_dir):
                 displayProgressBar(filesDone, totalFiles)
 
 def handleExclusionFile():
-    default_extension_list = ['.txt', '.ico', '.gz', '.jpg', '.obj', '.lib', '.dll', '.pdb', '.svg', '.pyc', '.xlsx', '.tar', '.docx', '.war', '.jpeg', '.a', '.jar', '.ipynb', '.so', '.class', '.pptx', '.pdf', '.zip', '.ear', '.gif', '.exe', '.o', '.png', '.json', '.gitignore']
+    default_extension_list = ['.txt', '.ico', '.gz', '.jpg', '.obj', '.lib', '.dll', '.pdb', '.svg', '.pyc', '.xlsx', '.tar', '.docx', '.war', '.jpeg', '.a', '.jar', '.ipynb', '.so', '.class', '.pptx', '.pdf', '.zip', '.ear', '.gif', '.exe', '.o', '.png', '.json', '.gitignore', '.css']
 
     default_folder_list = ['__pycache__', '.idea', '.bzr', '.pytest_cache', 'tmp', 'output', 'venv', '.cache', '.hg', 'node_modules', '.gradle', '.docker', 'test_output', 'out', '.svn', '.vscode', '.vs', 'node_modules_cache', '.next', '.history', 'coverage', '.git', 'bower_components', 'temp', 'env', '.settings', 'dist', 'logs', 'backup', 'tests_output', '.sass-cache', 'build']
 
