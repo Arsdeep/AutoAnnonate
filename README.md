@@ -33,7 +33,8 @@ The script can be run from the command line with various options:
 python WriteComments.py [--src SRC_DIRECTORY] [--out DST_DIRECTORY] [--excludeHiddenDirs true|false]
 ```
 
-Using it without any arguments will prompt you to generate exclusion lists if they aren't in current directory. It is recommended to generate them
+Using it without any arguments will prompt you to generate exclusion lists if they aren't in current directory. It is recommended to generate them.
+
 After that it will create a new "Generated" folder and start going through each file in the current directory and start putting modified files with comments in the Generated Folder.
 
 ### Options
