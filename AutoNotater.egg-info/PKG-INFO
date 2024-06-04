@@ -15,7 +15,7 @@ Requires-Dist: python-dotenv
 Requires-Dist: discord.py
 Requires-Dist: Ipython
 
-# AutoAnnotate
+# AutoAnnotate - An AI Powered Comment Writer
 
 ## Overview
 
@@ -30,6 +30,8 @@ This Python script processes all the files in a source directory, adds comments 
 3. **GEMINI API Key**: You need a GEMINI API key to use the Generative AI model if default one is unavailable.
 
 #### Setup
+
+You can get the script by going to **Releases** Section in the Github repositor
 
 1. **Install Required Packages**:
     ```bash
