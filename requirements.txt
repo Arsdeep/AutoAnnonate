@@ -1,0 +1,7 @@
+setuptools
+wheel
+twine
+google-generativeai
+python-dotenv
+discord.py
+Ipython

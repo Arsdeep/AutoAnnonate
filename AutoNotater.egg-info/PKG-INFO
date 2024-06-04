@@ -1,3 +1,20 @@
+Metadata-Version: 2.1
+Name: AutoNotater
+Version: 0.1.2
+Summary: A Python script processes all the files in a source directory, adds comments to the code using Google's Generative AI model (Gemini), and saves the processed files to a specified destination directory.
+Home-page: https://github.com/Arsdeep/AutoAnnotate
+Author: Arsdeep
+Author-email: arsdeepdewangan@example.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: google-generativeai
+Requires-Dist: python-dotenv
+Requires-Dist: discord.py
+Requires-Dist: Ipython
+
 # AutoAnnotate
 
 ## Overview
@@ -13,8 +30,6 @@ This Python script processes all the files in a source directory, adds comments 
 3. **GEMINI API Key**: You need a GEMINI API key to use the Generative AI model if default one is unavailable.
 
 #### Setup
-
-You can get the script by going to **Releases** Section in the Github repositor
 
 1. **Install Required Packages**:
     ```bash

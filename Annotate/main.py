@@ -6,7 +6,14 @@ import argparse
 import shutil
 
 # Set your GEMINI API key here
-GEMINI_API_KEY = 'your key'
+GEMINI_API_KEY = 'AIzaSyBa6pdU1gzWOW1N1cvqbTXfgNianM7U7h4'
+
+
+def fileSizeLimitReached(filename, lineNo):
+  #Checks if a file has more than given no. of lines.
+  with open(filename, 'r') as f:
+    lines = f.readlines()
+    return len(lines) > lineNo
 
 # Function to display progress bar
 def displayProgressBar(filesDone, totalFiles):
@@ -37,7 +44,7 @@ def count_files(folder_path):
     return total_files
 
 # Function to get the content with comments from the Generative AI model
-def getContentWithComments(relative_path, content):
+def getContentWithComments(model, relative_path, content):
     response = model.generate_content(f"""You're a Code commentor, your job is to only write comments when provided code and output only the modified raw code with comments without using markdown. You MUST NOT modify the code in any way.
     Write comments in the following file {relative_path}. Write comments appropriate syntax according to file type. The files content is -
     
@@ -47,7 +54,7 @@ def getContentWithComments(relative_path, content):
     return response
 
 # Function to process files from source directory to destination directory
-def process_files(src_dir, dst_dir):
+def process_files(src_dir, dst_dir,excludeHiddenDirs, model, fileSizeLimit):
 
     def readExclusionFile(file_name):
         with open(file_name, 'r') as file:
@@ -71,7 +78,7 @@ def process_files(src_dir, dst_dir):
     for root, dirs, files in os.walk(src_dir):
         # Filter out directories that start with '.'
 
-        if(args.excludeHiddenDirs):
+        if(excludeHiddenDirs):
             dirs[:] = [d for d in dirs if not d.startswith('.')]
         
         # Copy Exluded folders as it is
@@ -106,27 +113,33 @@ def process_files(src_dir, dst_dir):
 
             # Copy Exluded files as it is
             if file.startswith('.') or file.endswith(tuple(excluded_extension_list)):
-                print(f"\n\nCopying Excluded file '{src_file_path}' without changes...'\n")
+                print(f"\n\nCopying Excluded file '{src_file_path}' , Copying as it is...'\n")
                 shutil.copy(src_file_path, dst_file_path)
                 filesDone += 1
                 displayProgressBar(filesDone, totalFiles)
                 continue
-            
+                
+
             # Read the content from the source file
             with open(src_file_path, 'r') as src_file:
                 content = src_file.read()
-            
+
             # Get the new content with comments
-            new_content = getContentWithComments(rel_path, content)
+            new_content = getContentWithComments(model, rel_path, content)
             
             # Write the new content to the destination file
             try:
                 with open(dst_file_path, 'w', encoding='utf-8') as dst_file:
                     if(new_content == "NONE"):
+                        print(f"\n\nError in Generating Comments, Copying as it is...'{rel_path}'\n")
+                        dst_file.write(content)
+
+                    elif fileSizeLimitReached(src_file_path,fileSizeLimit):
+                        print(f"\n\nFile too big, Copying as it is...'{rel_path}'\n")
                         dst_file.write(content)
                     else:
+                        print(f"\n\nSuccessfully Created New File '{rel_path}'\n")
                         dst_file.write(new_content)
-                print(f"\n\nSuccessfully Created New File '{rel_path}'\n")
             except Exception as e:
                 print(f"\n\nCould Not Create File '{rel_path}': {e}\n")
             finally:
@@ -134,7 +147,7 @@ def process_files(src_dir, dst_dir):
                 displayProgressBar(filesDone, totalFiles)
 
 def handleExclusionFile():
-    default_extension_list = ['.txt', '.ico', '.gz', '.jpg', '.obj', '.lib', '.dll', '.pdb', '.svg', '.pyc', '.xlsx', '.tar', '.docx', '.war', '.jpeg', '.a', '.jar', '.ipynb', '.so', '.class', '.pptx', '.pdf', '.zip', '.ear', '.gif', '.exe', '.o', '.png', '.json', '.gitignore', '.css']
+    default_extension_list = ['.txt', '.ico', '.gz', '.jpg', '.obj', '.lib', '.dll', '.pdb', '.svg', '.pyc', '.xlsx', '.tar', '.docx', '.war', '.jpeg', '.a', '.jar', '.ipynb', '.so', '.class', '.pptx', '.pdf', '.zip', '.ear', '.gif', '.exe', '.o', '.png', '.json', '.gitignore', '.css', '.egg-info']
 
     default_folder_list = ['__pycache__', '.idea', '.bzr', '.pytest_cache', 'tmp', 'output', 'venv', '.cache', '.hg', 'node_modules', '.gradle', '.docker', 'test_output', 'out', '.svn', '.vscode', '.vs', 'node_modules_cache', '.next', '.history', 'coverage', '.git', 'bower_components', 'temp', 'env', '.settings', 'dist', 'logs', 'backup', 'tests_output', '.sass-cache', 'build']
 
@@ -165,25 +178,43 @@ def handleExclusionFile():
 
 
 
-if __name__ == "__main__":
+def main():
     # Configure the Generative AI model with the API key
     genai.configure(api_key=GEMINI_API_KEY)
     
-    # Initialize the Generative Model
-    model = genai.GenerativeModel('gemini-1.0-pro')
-
     parser = argparse.ArgumentParser(description="Example script to demonstrate argparse")
 
     parser.add_argument('--out', type=str, default='./Generated', help='Sets the relative/absolute Output directory')
     parser.add_argument('--src', type=str, default='./', help='Sets the relative/absolute Source directory')
+    parser.add_argument('--fileSizeLimit', type=int, default=200, help='Only files under the specified size limit (no. of lines) are Commented')
+    parser.add_argument('--model', type=str, default='gemini-1.0-pro', help="Set the Gemini Model to Use")
+    parser.add_argument('--listModels',action='store_true', help="List all the Gemini Models available")
     parser.add_argument('--excludeHiddenDirs', type=lambda x: (str(x).lower() != 'false'), default=True, help="Set true/false to Exclude Hidden Directories (beginning with '.') from Scan")
 
     # Parse the arguments
     args = parser.parse_args()
 
+    # Initialize the Generative Model
+    model = genai.GenerativeModel(args.model)
+
+    try:
+        # Try fetching with API key
+        model.generate_content("hi")
+    except Exception as e:
+        print(f"Error in API key: \n\n{e}\n\n Insert a valid API key in the script")
+        exit()
+
     # Source and destination directories
     src_directory = args.src
     dst_directory = args.out
+
+    # If Listmodels parameter is used
+    if args.listModels:
+        # List all the available models
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                print(m.name)
+        exit()
 
     # Remove the destination directory if it already exists
     if os.path.exists(dst_directory):
@@ -199,5 +230,8 @@ if __name__ == "__main__":
 
     print("\nGenerating Code...")
     # Process the files
-    process_files(src_directory, dst_directory)
+    process_files(src_directory, dst_directory, args.excludeHiddenDirs, model, args.fileSizeLimit)
     sys.stdout.write('\nCompleted!\n')
+
+if __name__ == "__main__":
+    main()

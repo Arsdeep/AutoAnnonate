@@ -29,3 +29,4 @@
 .json
 .gitignore
 .css
+.egg-info

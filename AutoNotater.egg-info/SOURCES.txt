@@ -1,0 +1,10 @@
+README.md
+setup.py
+Annotate/__init__.py
+Annotate/main.py
+AutoNotater.egg-info/PKG-INFO
+AutoNotater.egg-info/SOURCES.txt
+AutoNotater.egg-info/dependency_links.txt
+AutoNotater.egg-info/entry_points.txt
+AutoNotater.egg-info/requires.txt
+AutoNotater.egg-info/top_level.txt
